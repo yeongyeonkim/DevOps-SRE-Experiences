@@ -1,0 +1,411 @@
+// lambda/k8s-data-api/index.js
+const AWS = require('aws-sdk');
+
+const s3 = new AWS.S3({
+    region: process.env.AWS_REGION || 'us-west-2'
+});
+
+exports.handler = async (event) => {
+    console.log('Event:', JSON.stringify(event, null, 2));
+    
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+        'Content-Type': 'application/json'
+    };
+
+    // OPTIONS 요청 처리 (CORS preflight)
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ message: 'CORS preflight successful' })
+        };
+    }
+
+    try {
+        const bucketName = process.env.S3_BUCKET_NAME;
+        const objectKey = process.env.S3_OBJECT_KEY || 'k8s-metrics/latest.json';
+        
+        console.log(`Fetching from S3: ${bucketName}/${objectKey}`);
+        
+        const params = {
+            Bucket: bucketName,
+            Key: objectKey
+        };
+        
+        const data = await s3.getObject(params).promise();
+        const jsonData = JSON.parse(data.Body.toString());
+        
+        // 데이터 유효성 검사
+        if (!Array.isArray(jsonData)) {
+            throw new Error('Invalid data format: expected array');
+        }
+        
+        console.log(`Successfully fetched ${jsonData.length} records`);
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                data: jsonData,
+                lastModified: data.LastModified,
+                count: jsonData.length
+            })
+        };
+        
+    } catch (error) {
+        console.error('Error:', error);
+        
+        // S3 객체가 없는 경우
+        if (error.code === 'NoSuchKey') {
+            return {
+                statusCode: 404,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Data not found',
+                    message: 'K8s metrics data is not available'
+                })
+            };
+        }
+        
+        // 권한 오류
+        if (error.code === 'AccessDenied') {
+            return {
+                statusCode: 403,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Access denied',
+                    message: 'Insufficient permissions to access S3 data'
+                })
+            };
+        }
+        
+        // 기타 오류
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                success: false,
+                error: 'Internal server error',
+                message: error.message
+            })
+        };
+    }
+};
+
+---
+// lambda/k8s-data-collector/index.js
+const AWS = require('aws-sdk');
+const https = require('https');
+
+const s3 = new AWS.S3();
+const cloudwatch = new AWS.CloudWatch();
+
+// K8s API 호출 함수 (실제 구현 시 k8s 클라이언트 사용)
+async function getK8sMetrics() {
+    // 실제로는 Kubernetes API나 Prometheus를 통해 데이터 수집
+    // 여기서는 예시 데이터 생성
+    const namespaces = [
+        'admin', 'cart', 'coupon', 'customer', 'display', 
+        'frequency', 'gift', 'notification', 'oauth', 'order',
+        'ordersyncstreaming', 'payment', 'reward', 'sbcard', 
+        'sbcardwallet', 'support', 'sync'
+    ];
+    
+    const today = new Date().toISOString().split('T')[0];
+    const metrics = [];
+    
+    for (const namespace of namespaces) {
+        // 실제로는 kubectl이나 k8s API로 메트릭 수집
+        const podCount = Math.floor(Math.random() * 40) + 1;
+        const avgMaxCpu = Math.round((Math.random() * 60) * 100) / 100;
+        
+        metrics.push({
+            date: today,
+            namespace,
+            pod_count: podCount,
+            avg_max_cpu: avgMaxCpu
+        });
+    }
+    
+    return metrics;
+}
+
+exports.handler = async (event) => {
+    console.log('Starting K8s metrics collection...');
+    
+    try {
+        // K8s 메트릭 수집
+        const metrics = await getK8sMetrics();
+        
+        // S3에 저장
+        const bucketName = process.env.S3_BUCKET_NAME;
+        const timestamp = new Date().toISOString();
+        
+        // 최신 데이터로 저장
+        const latestParams = {
+            Bucket: bucketName,
+            Key: 'k8s-metrics/latest.json',
+            Body: JSON.stringify(metrics, null, 2),
+            ContentType: 'application/json',
+            Metadata: {
+                'collection-time': timestamp,
+                'record-count': metrics.length.toString()
+            }
+        };
+        
+        await s3.putObject(latestParams).promise();
+        
+        // 날짜별 히스토리 저장
+        const historyParams = {
+            Bucket: bucketName,
+            Key: `k8s-metrics/history/${timestamp.split('T')[0]}.json`,
+            Body: JSON.stringify(metrics, null, 2),
+            ContentType: 'application/json'
+        };
+        
+        await s3.putObject(historyParams).promise();
+        
+        // CloudWatch 메트릭 전송
+        const putMetricParams = {
+            Namespace: 'K8sDashboard',
+            MetricData: [
+                {
+                    MetricName: 'DataCollectionSuccess',
+                    Value: 1,
+                    Unit: 'Count',
+                    Timestamp: new Date()
+                },
+                {
+                    MetricName: 'RecordCount',
+                    Value: metrics.length,
+                    Unit: 'Count',
+                    Timestamp: new Date()
+                }
+            ]
+        };
+        
+        await cloudwatch.putMetricData(putMetricParams).promise();
+        
+        console.log(`Successfully collected and stored ${metrics.length} metrics`);
+        
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                success: true,
+                message: `Collected ${metrics.length} metrics`,
+                timestamp
+            })
+        };
+        
+    } catch (error) {
+        console.error('Error collecting metrics:', error);
+        
+        // 실패 메트릭 전송
+        try {
+            await cloudwatch.putMetricData({
+                Namespace: 'K8sDashboard',
+                MetricData: [{
+                    MetricName: 'DataCollectionFailure',
+                    Value: 1,
+                    Unit: 'Count',
+                    Timestamp: new Date()
+                }]
+            }).promise();
+        } catch (cwError) {
+            console.error('Failed to send failure metric:', cwError);
+        }
+        
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                success: false,
+                error: error.message
+            })
+        };
+    }
+};
+
+---
+// serverless.yml
+service: k8s-dashboard-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-west-2
+  stage: ${opt:stage, 'dev'}
+  
+  environment:
+    S3_BUCKET_NAME: ${self:custom.bucketName}
+    S3_OBJECT_KEY: k8s-metrics/latest.json
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Resource: 
+            - "arn:aws:s3:::${self:custom.bucketName}/*"
+        - Effect: Allow
+          Action:
+            - cloudwatch:PutMetricData
+          Resource: "*"
+
+custom:
+  bucketName: k8s-dashboard-data-${self:provider.stage}
+
+functions:
+  getK8sData:
+    handler: k8s-data-api/index.handler
+    description: API to fetch K8s metrics data from S3
+    timeout: 30
+    events:
+      - http:
+          path: /k8s-data
+          method: get
+          cors: true
+      - http:
+          path: /k8s-data
+          method: options
+          cors: true
+  
+  collectK8sData:
+    handler: k8s-data-collector/index.handler
+    description: Collect K8s metrics and store in S3
+    timeout: 300
+    events:
+      - schedule:
+          rate: rate(5 minutes)
+          enabled: true
+
+resources:
+  Resources:
+    K8sDataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        VersioningConfiguration:
+          Status: Enabled
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldVersions
+              Status: Enabled
+              NoncurrentVersionExpirationInDays: 30
+            - Id: DeleteOldHistoryFiles
+              Status: Enabled
+              Prefix: k8s-metrics/history/
+              ExpirationInDays: 90
+
+plugins:
+  - serverless-offline
+
+---
+// terraform/main.tf (Terraform 대안)
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# S3 Bucket
+resource "aws_s3_bucket" "k8s_data" {
+  bucket = "k8s-dashboard-data-${var.environment}"
+}
+
+resource "aws_s3_bucket_versioning" "k8s_data" {
+  bucket = aws_s3_bucket.k8s_data.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# IAM Role for Lambda
+resource "aws_iam_role" "lambda_role" {
+  name = "k8s-dashboard-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "k8s-dashboard-lambda-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.k8s_data.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# API Gateway
+resource "aws_api_gateway_rest_api" "k8s_api" {
+  name = "k8s-dashboard-api"
+  
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+variables "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-west-2"
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "dev"
+}

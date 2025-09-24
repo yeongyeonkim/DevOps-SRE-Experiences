@@ -1,0 +1,9 @@
+docker buildx create --name multiarch --use
+docker buildx inspect --bootstrap
+
+# ARM64용 빌드 (emulation 사용)
+docker buildx build --platform linux/arm64 -t k8s-dashboard --load .
+
+docker buildx build --platform linux/arm64 \
+  -t 123456789.dkr.ecr.ap-northeast-2.amazonaws.com/ecr/dashboard:latest \
+  --push .

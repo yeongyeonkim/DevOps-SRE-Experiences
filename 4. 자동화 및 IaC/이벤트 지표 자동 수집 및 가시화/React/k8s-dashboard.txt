@@ -1,0 +1,432 @@
+import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const K8sDashboard = () => {
+  const [selectedView, setSelectedView] = useState('cpu');
+  const [selectedDate, setSelectedDate] = useState('2025-09-16');
+
+  // 원본 데이터
+  const rawData = [
+    {"date": "2025-09-16", "namespace": "admin", "pod_count": 3, "avg_max_cpu": 1.42},
+    {"date": "2025-09-16", "namespace": "cart", "pod_count": 3, "avg_max_cpu": 2.68},
+    {"date": "2025-09-16", "namespace": "coupon", "pod_count": 6, "avg_max_cpu": 19.87},
+    {"date": "2025-09-16", "namespace": "customer", "pod_count": 13, "avg_max_cpu": 51.4},
+    {"date": "2025-09-16", "namespace": "display", "pod_count": 38, "avg_max_cpu": 16.28},
+    {"date": "2025-09-16", "namespace": "frequency", "pod_count": 3, "avg_max_cpu": 27.72},
+    {"date": "2025-09-16", "namespace": "gift", "pod_count": 3, "avg_max_cpu": 0.34},
+    {"date": "2025-09-16", "namespace": "notification", "pod_count": 3, "avg_max_cpu": 5.67},
+    {"date": "2025-09-16", "namespace": "oauth", "pod_count": 4, "avg_max_cpu": 10.11},
+    {"date": "2025-09-16", "namespace": "order", "pod_count": 8, "avg_max_cpu": 19.82},
+    {"date": "2025-09-16", "namespace": "ordersyncstreaming", "pod_count": 4, "avg_max_cpu": 16.16},
+    {"date": "2025-09-16", "namespace": "payment", "pod_count": 4, "avg_max_cpu": 21.29},
+    {"date": "2025-09-16", "namespace": "reward", "pod_count": 7, "avg_max_cpu": 28.6},
+    {"date": "2025-09-16", "namespace": "sbcard", "pod_count": 4, "avg_max_cpu": 33.01},
+    {"date": "2025-09-16", "namespace": "sbcardwallet", "pod_count": 3, "avg_max_cpu": 23.66},
+    {"date": "2025-09-16", "namespace": "support", "pod_count": 8, "avg_max_cpu": 25.4},
+    {"date": "2025-09-16", "namespace": "sync", "pod_count": 10, "avg_max_cpu": 22.79},
+    {"date": "2025-09-17", "namespace": "admin", "pod_count": 3, "avg_max_cpu": 1.84},
+    {"date": "2025-09-17", "namespace": "cart", "pod_count": 3, "avg_max_cpu": 0.91},
+    {"date": "2025-09-17", "namespace": "coupon", "pod_count": 6, "avg_max_cpu": 24.23},
+    {"date": "2025-09-17", "namespace": "customer", "pod_count": 13, "avg_max_cpu": 36.66},
+    {"date": "2025-09-17", "namespace": "display", "pod_count": 38, "avg_max_cpu": 24.43},
+    {"date": "2025-09-17", "namespace": "frequency", "pod_count": 3, "avg_max_cpu": 19.27},
+    {"date": "2025-09-17", "namespace": "gift", "pod_count": 3, "avg_max_cpu": 0.59},
+    {"date": "2025-09-17", "namespace": "notification", "pod_count": 3, "avg_max_cpu": 6.3},
+    {"date": "2025-09-17", "namespace": "oauth", "pod_count": 4, "avg_max_cpu": 20.56},
+    {"date": "2025-09-17", "namespace": "order", "pod_count": 7, "avg_max_cpu": 18.89},
+    {"date": "2025-09-17", "namespace": "ordersyncstreaming", "pod_count": 4, "avg_max_cpu": 6.53},
+    {"date": "2025-09-17", "namespace": "payment", "pod_count": 4, "avg_max_cpu": 25.22},
+    {"date": "2025-09-17", "namespace": "reward", "pod_count": 7, "avg_max_cpu": 38.42},
+    {"date": "2025-09-17", "namespace": "sbcard", "pod_count": 4, "avg_max_cpu": 20.35},
+    {"date": "2025-09-17", "namespace": "sbcardwallet", "pod_count": 3, "avg_max_cpu": 9.96},
+    {"date": "2025-09-17", "namespace": "support", "pod_count": 8, "avg_max_cpu": 32.02},
+    {"date": "2025-09-17", "namespace": "sync", "pod_count": 10, "avg_max_cpu": 34.75}
+  ];
+
+  // 네임스페이스별로 데이터 그룹화
+  const namespaces = [...new Set(rawData.map(item => item.namespace))];
+  const dates = [...new Set(rawData.map(item => item.date))];
+
+  // CPU 사용량 기준 차트 데이터 (선택된 날짜만)
+  const cpuChartData = selectedDate === 'all' 
+    ? namespaces.map(namespace => {
+        const data = { namespace };
+        dates.forEach(date => {
+          const item = rawData.find(d => d.namespace === namespace && d.date === date);
+          data[date] = item ? item.avg_max_cpu : 0;
+        });
+        return data;
+      }).sort((a, b) => b[dates[0]] - a[dates[0]])
+    : rawData
+        .filter(item => item.date === selectedDate)
+        .map(item => ({
+          namespace: item.namespace,
+          cpu: item.avg_max_cpu
+        }))
+        .sort((a, b) => b.cpu - a.cpu);
+
+  // Pod 수 기준 차트 데이터 (선택된 날짜만)
+  const podChartData = selectedDate === 'all'
+    ? namespaces.map(namespace => {
+        const data = { namespace };
+        dates.forEach(date => {
+          const item = rawData.find(d => d.namespace === namespace && d.date === date);
+          data[date] = item ? item.pod_count : 0;
+        });
+        return data;
+      }).sort((a, b) => b[dates[0]] - a[dates[0]])
+    : rawData
+        .filter(item => item.date === selectedDate)
+        .map(item => ({
+          namespace: item.namespace,
+          pods: item.pod_count
+        }))
+        .sort((a, b) => b.pods - a.pods);
+
+  // 필터링된 데이터
+  const filteredData = selectedDate === 'all' ? rawData : rawData.filter(item => item.date === selectedDate);
+
+  // 통계 계산
+  const totalPods = filteredData.reduce((sum, item) => sum + item.pod_count, 0);
+  const avgCPU = (filteredData.reduce((sum, item) => sum + item.avg_max_cpu, 0) / filteredData.length).toFixed(2);
+
+  const getCPUColor = (cpu) => {
+    if (cpu > 40) return '#dc2626';
+    if (cpu > 20) return '#d97706';
+    return '#059669';
+  };
+
+  // 스타일 정의
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb',
+      padding: '24px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    },
+    maxWidth: {
+      maxWidth: '1400px',
+      margin: '0 auto'
+    },
+    card: {
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      padding: '24px',
+      marginBottom: '24px'
+    },
+    header: {
+      marginBottom: '32px'
+    },
+    title: {
+      fontSize: '30px',
+      fontWeight: 'bold',
+      color: '#111827',
+      marginBottom: '8px'
+    },
+    subtitle: {
+      color: '#6b7280'
+    },
+    controlPanel: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '16px',
+      alignItems: 'center'
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '8px'
+    },
+    button: {
+      padding: '8px 16px',
+      borderRadius: '6px',
+      border: 'none',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s'
+    },
+    buttonActive: {
+      backgroundColor: '#2563eb',
+      color: 'white'
+    },
+    buttonInactive: {
+      backgroundColor: '#e5e7eb',
+      color: '#374151'
+    },
+    select: {
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      outline: 'none',
+      fontSize: '14px'
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '24px',
+      marginBottom: '24px'
+    },
+    statCard: {
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      padding: '24px'
+    },
+    statLabel: {
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#6b7280',
+      marginBottom: '8px'
+    },
+    statValue: {
+      fontSize: '24px',
+      fontWeight: 'bold'
+    },
+    chartContainer: {
+      width: '100%',
+      height: '400px'
+    },
+    sectionTitle: {
+      fontSize: '20px',
+      fontWeight: '600',
+      color: '#111827',
+      marginBottom: '16px'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse'
+    },
+    tableHeader: {
+      backgroundColor: '#f9fafb',
+      padding: '12px 24px',
+      textAlign: 'left',
+      fontSize: '12px',
+      fontWeight: '500',
+      color: '#6b7280',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      borderBottom: '1px solid #e5e7eb'
+    },
+    tableCell: {
+      padding: '16px 24px',
+      fontSize: '14px',
+      borderBottom: '1px solid #e5e7eb'
+    },
+    tableRowEven: {
+      backgroundColor: 'white'
+    },
+    tableRowOdd: {
+      backgroundColor: '#f9fafb'
+    },
+    badge: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '2px 10px',
+      borderRadius: '9999px',
+      fontSize: '12px',
+      fontWeight: '500',
+      backgroundColor: '#dbeafe',
+      color: '#1e40af'
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.maxWidth}>
+        {/* 헤더 */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>Kubernetes 클러스터 모니터링</h1>
+          <p style={styles.subtitle}>네임스페이스별 리소스 사용량 및 Pod 현황</p>
+        </div>
+
+        {/* 컨트롤 패널 */}
+        <div style={styles.card}>
+          <div style={styles.controlPanel}>
+            <div style={styles.buttonGroup}>
+              <button
+                onClick={() => setSelectedView('cpu')}
+                style={{
+                  ...styles.button,
+                  ...(selectedView === 'cpu' ? styles.buttonActive : styles.buttonInactive)
+                }}
+              >
+                CPU 사용량
+              </button>
+              <button
+                onClick={() => setSelectedView('pods')}
+                style={{
+                  ...styles.button,
+                  ...(selectedView === 'pods' ? styles.buttonActive : styles.buttonInactive)
+                }}
+              >
+                Pod 수
+              </button>
+            </div>
+            
+            <select
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={styles.select}
+            >
+              <option value="all">전체 기간</option>
+              {dates.map(date => (
+                <option key={date} value={date}>{date}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* 요약 통계 */}
+        <div style={styles.statsGrid}>
+          <div style={styles.statCard}>
+            <h3 style={styles.statLabel}>총 네임스페이스</h3>
+            <p style={{...styles.statValue, color: '#111827'}}>{namespaces.length}</p>
+          </div>
+          <div style={styles.statCard}>
+            <h3 style={styles.statLabel}>총 Pod 수</h3>
+            <p style={{...styles.statValue, color: '#2563eb'}}>{totalPods}</p>
+          </div>
+          <div style={styles.statCard}>
+            <h3 style={styles.statLabel}>평균 CPU 사용량</h3>
+            <p style={{...styles.statValue, color: '#059669'}}>{avgCPU}%</p>
+          </div>
+        </div>
+
+        {/* 메인 차트 영역 */}
+        <div style={styles.card}>
+          <h2 style={styles.sectionTitle}>
+            {selectedView === 'cpu' && 'CPU 사용량 비교'}
+            {selectedView === 'pods' && 'Pod 수 비교'}
+          </h2>
+          
+          <div style={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height="100%">
+              {selectedView === 'cpu' && (
+                selectedDate === 'all' ? (
+                  <BarChart data={cpuChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="namespace" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      fontSize={12}
+                    />
+                    <YAxis label={{ value: 'CPU 사용량 (%)', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip formatter={(value, name) => [`${value}%`, name]} />
+                    <Legend />
+                    {dates.map((date, index) => (
+                      <Bar 
+                        key={date} 
+                        dataKey={date} 
+                        fill={index === 0 ? '#3B82F6' : '#EF4444'} 
+                        name={date}
+                      />
+                    ))}
+                  </BarChart>
+                ) : (
+                  <BarChart data={cpuChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="namespace" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      fontSize={12}
+                    />
+                    <YAxis label={{ value: 'CPU 사용량 (%)', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip formatter={(value) => [`${value}%`, 'CPU 사용량']} />
+                    <Bar dataKey="cpu" fill="#3B82F6" />
+                  </BarChart>
+                )
+              )}
+              
+              {selectedView === 'pods' && (
+                selectedDate === 'all' ? (
+                  <BarChart data={podChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="namespace" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      fontSize={12}
+                    />
+                    <YAxis label={{ value: 'Pod 수', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip />
+                    <Legend />
+                    {dates.map((date, index) => (
+                      <Bar 
+                        key={date} 
+                        dataKey={date} 
+                        fill={index === 0 ? '#10B981' : '#F59E0B'} 
+                        name={date}
+                      />
+                    ))}
+                  </BarChart>
+                ) : (
+                  <BarChart data={podChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="namespace" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      fontSize={12}
+                    />
+                    <YAxis label={{ value: 'Pod 수', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip formatter={(value) => [value, 'Pod 수']} />
+                    <Bar dataKey="pods" fill="#10B981" />
+                  </BarChart>
+                )
+              )}
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 상세 테이블 */}
+        <div style={styles.card}>
+          <h2 style={styles.sectionTitle}>상세 정보</h2>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>네임스페이스</th>
+                  <th style={styles.tableHeader}>날짜</th>
+                  <th style={styles.tableHeader}>Pod 수</th>
+                  <th style={styles.tableHeader}>평균 최대 CPU 사용량</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData
+                  .sort((a, b) => b.avg_max_cpu - a.avg_max_cpu)
+                  .map((item, index) => (
+                  <tr key={index} style={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}>
+                    <td style={{...styles.tableCell, fontWeight: '500', color: '#111827'}}>
+                      {item.namespace}
+                    </td>
+                    <td style={{...styles.tableCell, color: '#6b7280'}}>
+                      {item.date}
+                    </td>
+                    <td style={styles.tableCell}>
+                      <span style={styles.badge}>
+                        {item.pod_count}
+                      </span>
+                    </td>
+                    <td style={styles.tableCell}>
+                      <span style={{fontWeight: '500', color: getCPUColor(item.avg_max_cpu)}}>
+                        {item.avg_max_cpu}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default K8sDashboard;
