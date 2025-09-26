@@ -1,0 +1,3 @@
+Airflow 모니터링을 위한 statsd dashboard
+ - https://github.com/databand-ai/airflow-dashboards/?tab=readme-ov-file
+ - https://docs.newrelic.com/kr/docs/infrastructure/other-infrastructure-integrations/monitoring-airflow-ot/

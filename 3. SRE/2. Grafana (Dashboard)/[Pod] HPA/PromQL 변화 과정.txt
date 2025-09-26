@@ -1,0 +1,183 @@
+---- cpu usage recording rule ----
+recording rule
+  - name: k8s.rules.container_cpu_usage_seconds_total
+    rules:
+    - expr: |-
+        sum by ({{ range $.Values.defaultRules.additionalAggregationLabels }}{{ . }},{{ end }}cluster, namespace, pod, container) (
+          irate(container_cpu_usage_seconds_total{job="kubelet", metrics_path="/metrics/cadvisor", image!=""}[5m])
+        ) * on ({{ range $.Values.defaultRules.additionalAggregationLabels }}{{ . }},{{ end }}cluster, namespace, pod) group_left(node) topk by ({{ range $.Values.defaultRules.additionalAggregationLabels }}{{ . }},{{ end }}cluster, namespace, pod) (
+          1, max by ({{ range $.Values.defaultRules.additionalAggregationLabels }}{{ . }},{{ end }}cluster, namespace, pod, node) (kube_pod_info{node!=""})
+        )
+      record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+	  
+---- 첫 시도 쿼리: Pod CPU 조건 ----
+avg by (namespace) (
+  avg_over_time(
+    (
+      sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~"$namespace"}) by (namespace, pod)
+      /
+      sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests{namespace=~"$namespace"}) by (namespace, pod)
+      * 100
+    )[5m:1m]
+  )
+) > 45
+
+하지만 위 쿼리로는 부정확하다.
+1. Rolling update나 재시작인지 구분할 수 없음
+2. 노이즈 제거: CPU 스파이크가 감지될 수 있음
+
+---- 최종 쿼리: Pod CPU 조건 + HPA 조건 ----
+[A]
+(
+  avg by (namespace) (
+    avg_over_time(
+      (
+        sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~"$sp_namespace"}) by (namespace, pod)
+        /
+        sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests{namespace=~"$sp_namespace"}) by (namespace, pod)
+        * 100
+      )[5m:1m]
+    )
+  ) > 45
+)
+and on(namespace)
+(
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+  >
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"} offset 3m)
+)
+
+1. offset을 통한 과거 특정 시점의 데이터를 조회 (다소 빠른 감지를 위해 3m으로 설정)
+  -> 이 값은 운영 적용 이후, 변동될 수 있음
+  
+---- Grafana Alert 설정 ----
+[쿼리 레벨 지연 분석]
+ - [5m:1m] avg_over_time: 과거 5분 데이터 사용
+ - offset 3m: 3분 전 HPA 상태와 비교
+ -> 실질적 데이터 지연: 약 3~5분
+
+의도하지않은 불필요한 Case는 제거하기 위해 쿼리 단게에서 텀을 많이 두었다.
+때문에, Alert 레벨에서는 지연을 짧게 주어야 Alert에 따른 인지가 가능할 것 같다.
+
+[Alert 설정]
+![](img/Grafana Alert 설정)
+
+evalutation internval은 10초로 자주 체크하며
+pending period는 0s로 즉시 인지할 수 있도록 한다.
+ -> 실시간성 확보
+ 
+---- Notification Templates ----
+[Title]
+{{ define "teams.title.yyk" }}
+  [{{ .CommonLabels.severity | title }}] {{ .CommonLabels.namespace }} - HPA Scaling ({{ .Status | title }})
+{{ end }}
+
+[Message]
+{{ define "teams-hpa-message" }}
+{{ range .Alerts }}
+**대상 서비스:** {{ .CommonLabels.namespace }}
+**임계치:** 45%
+
+**HPA 상태**
+- **현재 파드 개수:** {{ printf "%.0f" .Values.B }} pods
+- **이전 파드 개수:** {{ printf "%.0f" .Values.C }} pods (3분 전)
+- **변동 개수** +{{ printf "%.0f" .Values.D }} pods
+
+**상세 내용**
+- **발생 시점:** {{ .StartsAt.Format "2006-01-02 15:04:05 KST" }}  
+
+**Summary**
+- {{ .CommonLabels.namespace }} 평균 CPU 사용량 45% 이상으로 오토스케일링 발생
+
+{{ end }}
+{{ end }}
+
+
+추가로, Title에 넣기위한 Query B, C가 필요하다
+[A]
+(
+  avg by (namespace) (
+    avg_over_time(
+      (
+        sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~"$sp_namespace"}) by (namespace, pod)
+        /
+        sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests{namespace=~"$sp_namespace"}) by (namespace, pod)
+        * 100
+      )[5m:1m]
+    )
+  ) > 45
+)
+and on(namespace)
+(
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+  >
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"} offset 3m)
+)
+
+
+[B] 현재 파드 개수
+max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+
+[C] 3분 전 파드 개수
+max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"} offset 3m)
+
+=====================
+
+그런데 네임스페이스가 하나일 때는 괜찮았지만 여러개 일 때는 안되나보다
+invalid format of evaluation results for the alert definition E: looks like time series data, only reduced data can be alerted on
+이런 에러가 발생한다.
+
+원인은 Alert rule에서는 모든 쿼리가 단일 값을 반환해야하는데
+[B],[C]는 max by (namespace)로 네임스페이스별 시계열 데이터 반환으로 문제가 된다.
+
+[B] 현재 파드 개수
+max(kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+
+[C] 3분 전 파드 개수
+max(kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"} offset 3m)
+
+
+
+{{ define "teams-hpa-message" }}
+{{ range .Alerts }}
+**대상 서비스:** {{ .CommonLabels.namespace }}
+**임계치:** 45%
+
+**HPA 상태**
+- **현재 파드 개수:** {{ printf "%.0f" .Values.B }} pods
+- **이전 파드 개수:** {{ printf "%.0f" .Values.C }} pods (3분 전)
+
+**상세 내용**
+- **발생 시점:** {{ .StartsAt.Format "2006-01-02 15:04:05 KST" }}  
+
+**Summary**
+- {{ .CommonLabels.namespace }} 평균 CPU 사용량 45% 이상으로 오토스케일링 발생
+
+{{ end }}
+{{ end }}
+
+
+{{ define "teams-hpa-message" }}
+{{ range .Alerts }}
+**대상 서비스:** {{ .CommonLabels.namespace }}
+**임계치:** 45%
+
+**HPA 상태**
+- **현재 파드 개수:** {{ .Annotations.current_pods }}
+- **이전 파드 개수:** {{ .Annotations.prev_pods }}
+
+**상세 내용**
+- **발생 시점:** {{ .StartsAt.Format "2006-01-02 15:04:05 KST" }}  
+
+**Summary**
+- {{ .CommonLabels.namespace }} 평균 CPU 사용량 45% 이상으로 오토스케일링 발생
+
+{{ end }}
+{{ end }}
+
+
+----
+해결했다.
+Options에서 Time Range를 몇으로 주냐에 따라
+Reduce에 따른 값 인지 범위가 달라져서 조건을 설정할 수 있다..
+이것은 다음 주에 정리할 예정
