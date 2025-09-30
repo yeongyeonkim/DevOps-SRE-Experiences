@@ -181,3 +181,124 @@ max(kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespa
 Options에서 Time Range를 몇으로 주냐에 따라
 Reduce에 따른 값 인지 범위가 달라져서 조건을 설정할 수 있다..
 이것은 다음 주에 정리할 예정
+
+[A]
+Option: Time Range (now-10m to now)
+(
+  avg by (namespace) (
+    avg_over_time(
+      (
+        sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~"$sp_namespace"}) by (namespace, pod)
+        /
+        sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests{namespace=~"$sp_namespace"}) by (namespace, pod)
+        * 100
+      )[3m:1m]
+    )
+  ) > 45
+)
+and on(namespace)
+(
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+  >
+  max by (namespace) (kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"} offset 3m)
+)
+
+[B]
+max(kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+
+[C]
+max(kube_horizontalpodautoscaler_status_current_replicas{namespace=~"$sp_namespace"})
+
+위와 같이 설정을 하고 부하를 주었습니다.
+10시 29분에 HPA에 Size를 올리는 것을 시도하였고
+
+알람에 대한 메시지 템플릿은 아래와 같다.
+
+{{ define "teams-hpa-message" }}
+{{ range .Alerts }}
+**대상 서비스:** {{ .Labels.namespace }}
+**임계치:** 45%
+
+**HPA 상태**
+- **현재 파드 개수:** {{ index .Values "B" }}
+- **이전 파드 개수:** {{ index .Values "C" }}
+
+**상세 내용**
+- **발생 시점:** {{ .StartsAt.Format "2006-01-02 15:04:05 KST" }}
+
+**Summary**
+- {{ .Labels.namespace }} 평균 CPU 사용량 45% 이상으로 오토스케일링 발생
+
+{{ end }}
+{{ end }}
+
+
+그리고 그 결과는
+
+[Warning] service - HPA Scaling (Firing)
+대상 서비스: service 임계치: 45%
+HPA 상태
+현재 파드 개수: 0
+이전 파드 개수: 0
+상세 내용
+발생 시점: 2025-09-30 01:28:40 KST
+Summary
+service 평균 CPU 사용량 45% 이상으로 오토스케일링 발생
+
+뭔가 현재, 이전 파드 개수가 0으로나오는데
+어떤 이유일까요
+
+
+===== Pod CPU =====
+[Alert 설정]
+(
+  rate(container_cpu_usage_seconds_total{namespace=~"$sp_namespace", container!="POD",container!=""}[1m]) * 100
+) > 60
+and on(pod, namespace) 
+(
+  (time() - kube_pod_created{}) > 600
+)
+
+Options
+ - Time Range: now-5m to now
+ - Interval: 15s
+
+Evaluation behavior
+ - evaluated every 30s (더 빠른 감지)
+ - Pending period 2m (2회 연속 임계값 초과 시 알림)
+
+-> [1m] rate 윈도우로 더 빠른 반응
+-> 30초마다 평가하여 최대 30초 지연
+-> 2분 pending으로 일시적 스파이크 필터링 (이건 뺄 듯)
+
+[트리거 조건]
+알림이 발생하는 조건:
+컨테이너의 CPU 사용률이 60%를 초과하고, 해당 파드가 생성된 지 10분(600초) 이상 경과한 경우
+상세 조건
+
+[CPU 사용률 임계값]
+최근 1분간의 평균 CPU 사용률이 60% 초과
+대상: $sp_namespace에 속한 모든 컨테이너 (POD 컨테이너 및 빈 컨테이너 제외)
+
+[파드 안정화 기간]
+파드 생성 후 10분 이상 경과한 경우만 알림 발생
+목적: 초기 시작 단계의 높은 CPU 사용률로 인한 오탐 방지
+
+[평가 주기]
+매 30초마다 조건 평가
+# 조건 충족 시 즉시 알림 발생 (Pending 기간 없음)
+조건 2회 충족 시, 알림 발생
+
+[데이터 수집 범위]
+최근 5분간의 데이터를 15초 간격으로 수집하여 평가
+
+[알림 동작 흐름]
+시간 0초: CPU 60% 초과 감지
+  ↓ (30초 대기)
+시간 30초: CPU 60% 초과 재확인
+  ↓ (30초 대기)
+시간 60초: CPU 60% 초과 재확인
+  ↓ (30초 대기)
+시간 90초: CPU 60% 초과 재확인
+  ↓ (30초 대기)
+시간 120초: 알림 발생 (Pending 2분 경과)
