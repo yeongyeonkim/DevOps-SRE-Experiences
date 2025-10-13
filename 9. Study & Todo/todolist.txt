@@ -1,0 +1,5 @@
+CICD 파이프라인의 일부로 Observability를 활용하여 배포 전략을 구현
+
+kubeflow를 활용한 머신러닝 워크플로우
+
+Self-healing 시스템을 도입

@@ -1,0 +1,27 @@
+[Kubeflow란]
+
+Kubernetes 위에서 머신러닝 워크플로우를 배포, 확장, 관리하기 위한 오픈소스 플랫폼이다.
+ML 파이프라인의 전체 생명주기를 관리한다.
+ * ML 워크플로우 자동화
+ * 하이퍼 파라미터 튜닝
+ * Jupyter 통합
+ * TensorFlow 등 분산 학습 지원
+
+[사이렌 오더와 같은 서비스 활용 방안]
+
+1. 실시간 트래픽 예측 모델
+ * 시간대별, 요일별, 이벤트별 주문량 예측
+
+2. 이상 탐지
+ * 주문 패턴 이상 감지
+
+[Kubeflow 파이프라인에 SageMaker AI 구성 요소를 사용하는 이유]
+https://docs.aws.amazon.com/ko_kr/sagemaker/latest/dg/kubernetes-sagemaker-components-for-kubeflow-pipelines.html#why-use-sagemaker-components
+
+둘 다, MLOps 환경을 구축하기 위한 방법이지만
+Kubeflow는 오픈소스 Kubeflow를 직접 운영 커스터마이징하기 위한 목적이고
+SageMaker는 완전 관리형으로 제공하는 MLOps 플랫폼이다. 
+
+
+[AWS에서 Kubeflow 구현 방법]
+Amazon EKS + Kubeflow
