@@ -7,40 +7,14 @@ const K8sDashboard = () => {
 
   // 원본 데이터
   const rawData = [
-    {"date": "2025-09-16", "namespace": "admin", "pod_count": 3, "avg_max_cpu": 1.42},
-    {"date": "2025-09-16", "namespace": "cart", "pod_count": 3, "avg_max_cpu": 2.68},
-    {"date": "2025-09-16", "namespace": "coupon", "pod_count": 6, "avg_max_cpu": 19.87},
-    {"date": "2025-09-16", "namespace": "customer", "pod_count": 13, "avg_max_cpu": 51.4},
-    {"date": "2025-09-16", "namespace": "display", "pod_count": 38, "avg_max_cpu": 16.28},
-    {"date": "2025-09-16", "namespace": "frequency", "pod_count": 3, "avg_max_cpu": 27.72},
-    {"date": "2025-09-16", "namespace": "gift", "pod_count": 3, "avg_max_cpu": 0.34},
-    {"date": "2025-09-16", "namespace": "notification", "pod_count": 3, "avg_max_cpu": 5.67},
-    {"date": "2025-09-16", "namespace": "oauth", "pod_count": 4, "avg_max_cpu": 10.11},
-    {"date": "2025-09-16", "namespace": "order", "pod_count": 8, "avg_max_cpu": 19.82},
-    {"date": "2025-09-16", "namespace": "ordersyncstreaming", "pod_count": 4, "avg_max_cpu": 16.16},
-    {"date": "2025-09-16", "namespace": "payment", "pod_count": 4, "avg_max_cpu": 21.29},
-    {"date": "2025-09-16", "namespace": "reward", "pod_count": 7, "avg_max_cpu": 28.6},
-    {"date": "2025-09-16", "namespace": "sbcard", "pod_count": 4, "avg_max_cpu": 33.01},
-    {"date": "2025-09-16", "namespace": "sbcardwallet", "pod_count": 3, "avg_max_cpu": 23.66},
-    {"date": "2025-09-16", "namespace": "support", "pod_count": 8, "avg_max_cpu": 25.4},
-    {"date": "2025-09-16", "namespace": "sync", "pod_count": 10, "avg_max_cpu": 22.79},
-    {"date": "2025-09-17", "namespace": "admin", "pod_count": 3, "avg_max_cpu": 1.84},
-    {"date": "2025-09-17", "namespace": "cart", "pod_count": 3, "avg_max_cpu": 0.91},
-    {"date": "2025-09-17", "namespace": "coupon", "pod_count": 6, "avg_max_cpu": 24.23},
-    {"date": "2025-09-17", "namespace": "customer", "pod_count": 13, "avg_max_cpu": 36.66},
-    {"date": "2025-09-17", "namespace": "display", "pod_count": 38, "avg_max_cpu": 24.43},
-    {"date": "2025-09-17", "namespace": "frequency", "pod_count": 3, "avg_max_cpu": 19.27},
-    {"date": "2025-09-17", "namespace": "gift", "pod_count": 3, "avg_max_cpu": 0.59},
-    {"date": "2025-09-17", "namespace": "notification", "pod_count": 3, "avg_max_cpu": 6.3},
-    {"date": "2025-09-17", "namespace": "oauth", "pod_count": 4, "avg_max_cpu": 20.56},
-    {"date": "2025-09-17", "namespace": "order", "pod_count": 7, "avg_max_cpu": 18.89},
-    {"date": "2025-09-17", "namespace": "ordersyncstreaming", "pod_count": 4, "avg_max_cpu": 6.53},
-    {"date": "2025-09-17", "namespace": "payment", "pod_count": 4, "avg_max_cpu": 25.22},
-    {"date": "2025-09-17", "namespace": "reward", "pod_count": 7, "avg_max_cpu": 38.42},
-    {"date": "2025-09-17", "namespace": "sbcard", "pod_count": 4, "avg_max_cpu": 20.35},
-    {"date": "2025-09-17", "namespace": "sbcardwallet", "pod_count": 3, "avg_max_cpu": 9.96},
-    {"date": "2025-09-17", "namespace": "support", "pod_count": 8, "avg_max_cpu": 32.02},
-    {"date": "2025-09-17", "namespace": "sync", "pod_count": 10, "avg_max_cpu": 34.75}
+    {"date": "2025-09-16", "namespace": "svc1", "pod_count": 3, "avg_max_cpu": 1.42},
+    {"date": "2025-09-16", "namespace": "svc2", "pod_count": 3, "avg_max_cpu": 2.68},
+    {"date": "2025-09-16", "namespace": "svc3", "pod_count": 6, "avg_max_cpu": 19.87},
+    {"date": "2025-09-16", "namespace": "svc4", "pod_count": 13, "avg_max_cpu": 51.4},
+    {"date": "2025-09-16", "namespace": "svc5", "pod_count": 38, "avg_max_cpu": 16.28},
+    {"date": "2025-09-16", "namespace": "svc6", "pod_count": 3, "avg_max_cpu": 27.72},
+    {"date": "2025-09-16", "namespace": "svc7", "pod_count": 3, "avg_max_cpu": 0.34},
+    {"date": "2025-09-16", "namespace": "svc8", "pod_count": 3, "avg_max_cpu": 5.67}
   ];
 
   // 네임스페이스별로 데이터 그룹화
