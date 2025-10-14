@@ -111,10 +111,8 @@ async function getK8sMetrics() {
     // 실제로는 Kubernetes API나 Prometheus를 통해 데이터 수집
     // 여기서는 예시 데이터 생성
     const namespaces = [
-        'admin', 'cart', 'coupon', 'customer', 'display', 
-        'frequency', 'gift', 'notification', 'oauth', 'order',
-        'ordersyncstreaming', 'payment', 'reward', 'sbcard', 
-        'sbcardwallet', 'support', 'sync'
+        'svc1', 'svc2', 'svc3', 'svc4', 'svc5', 
+        'svc6', 'svc7'
     ];
     
     const today = new Date().toISOString().split('T')[0];
