@@ -1,1 +1,0 @@
-https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/21.1.5#eks-managed-node-group

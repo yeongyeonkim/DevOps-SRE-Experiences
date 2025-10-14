@@ -10,16 +10,11 @@ resource "helm_release" "kube-prometheus-stack" {
   reuse_values     = true
   values = [
     yamlencode({
-      ######################## alertmanager 설정 ########################
       alertmanager = {
         ingress = {
           enabled = false
-          # ingressClassName = "alb"
-          # annotations      = local.ingress_default_annotation
-          # paths            = ["/alertmanager"]
         }
         alertmanagerSpec = {
-          # logLevel = "debug"
           affinity    = local.affinity
           tolerations = local.tolerations
         }
@@ -45,13 +40,6 @@ resource "helm_release" "kube-prometheus-stack" {
                 receiver = "warning"
                 matchers = [
                   "severity=\"warning\"",
-                  "env=\"${var.env}\""
-                ]
-              },
-              {
-                receiver = "info"
-                matchers = [
-                  "severity=\"info\"",
                   "env=\"${var.env}\""
                 ]
               }
@@ -101,15 +89,6 @@ resource "helm_release" "kube-prometheus-stack" {
               ]
             },
             {
-              name = "info"
-              webhook_configs = [
-                {
-                  url           = var.alertmanager_webhook_url["info"]
-                  send_resolved = true
-                }
-              ]
-            },
-            {
               name = "default"
               webhook_configs = [
                 {
@@ -122,39 +101,7 @@ resource "helm_release" "kube-prometheus-stack" {
         }
       }
 
-      ######################## grafana 설정 ########################
       grafana = {
-        sidecar = {
-          alerts = {
-            enabled         = true
-            resource        = "configmap"     # CM 사용
-            label           = "grafana_alert" # CM 라벨 키
-            labelValue      = "1"             # (옵션) 라벨 값
-            searchNamespace = "monitoring"    # 같은 네임스페이스만 감시(권장)
-            reloadURL       = "http://localhost:3000/api/admin/provisioning/alerting/reload"
-            env = [
-              { name = "REQ_USERNAME", value = "admin" },
-              { name = "REQ_PASSWORD", value = "admin" },
-            ]
-          },
-          datasources = {
-            enabled         = true
-            resource        = "configmap"          # CM 사용
-            label           = "grafana_datasource" # CM 라벨 키
-            labelValue      = "1"                  # (옵션) 라벨 값
-            searchNamespace = "monitoring"         # 같은 네임스페이스만 감시(권장)
-            reloadURL       = "http://localhost:3000/api/admin/provisioning/datasources/reload"
-            env = [
-              { name = "REQ_USERNAME", value = "admin" },
-              { name = "REQ_PASSWORD", value = "admin" },
-            ]
-          },
-          dashboards = {
-            provider = {
-              allowUiUpdates = true
-            }
-          }
-        }
         defaultDashboardsEnabled  = false
         defaultDashboardsTimezone = "Asia/Seoul"
         adminPassword             = "admin"
@@ -177,6 +124,7 @@ resource "helm_release" "kube-prometheus-stack" {
           annotations      = local.ingress_default_annotation
           path             = "/grafana"
         }
+        ## PVC는 개선 대상
         persistence = {
           enabled          = true
           storageClassName = "grafana-sc"
@@ -189,13 +137,11 @@ resource "helm_release" "kube-prometheus-stack" {
         tolerations = local.tolerations
       }
 
-      #################### prometheus operator 설정 ########################
       prometheusOperator = {
         affinity    = local.affinity
         tolerations = local.tolerations
       }
 
-      ################### prometheus 설정 ########################
       prometheus = {
         service = {
           type = "NodePort"
@@ -209,7 +155,6 @@ resource "helm_release" "kube-prometheus-stack" {
         }
         enableAdminAPI = true
         prometheusSpec = {
-          # 네임스페이스에 관계 없이 PrometheusRule을 프로메테우스 오퍼레이터가 인식할 수 있도록 한다.
           # ruleSelectorNilUsesHelmValues = false
           enableRemoteWriteReceiver = true
           resources                 = local.resource.prometheus
@@ -218,7 +163,6 @@ resource "helm_release" "kube-prometheus-stack" {
           routePrefix               = "/prometheus"
           externalUrl               = local.externalUrl[var.env]
           storageSpec = {
-            ## Using PersistentVolumeClaim
             volumeClaimTemplate = {
               spec = {
                 enabled          = true
@@ -235,32 +179,6 @@ resource "helm_release" "kube-prometheus-stack" {
           affinity    = local.affinity
           tolerations = local.tolerations
         }
-        # chart로만 생성된 monitor를 감지 (default: true)
-        # serviceMonitorSelectorNilUsesHelmValues = false
-        # 근데 true하면 아래 설정이 안됨.
-        # additionalServiceMonitors = [
-        #   {
-        #     "name" : "test-servicemonitor",
-        #     "selector" : {
-        #       "matchLabels" : {
-        #         "env" : "test"
-        #       }
-        #     },
-        #     "namespaceSelector" : {
-        #       "any" : true
-        #       # "any": false,
-        #       # "matchNames": [
-        #       #     "test", "testt"
-        #       # ]
-        #     },
-        #     "endpoints" : [
-        #       {
-        #         "port" : "http",
-        #         "path" : "/test/monitor/metrics"
-        #       }
-        #     ]
-        #   }
-        # ]
       },
       # kube_node_labels 쿼리 하기 위해 
       # kube-state-metrics의 --metric-allowlist 옵션을 넣어야 한다.
@@ -276,6 +194,5 @@ resource "helm_release" "kube-prometheus-stack" {
       }
     })
   ]
-
   depends_on = [kubernetes_storage_class.monitoring_storage_class]
 }
