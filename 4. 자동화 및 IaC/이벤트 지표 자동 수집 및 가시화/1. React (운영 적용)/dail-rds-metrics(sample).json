@@ -1,0 +1,9 @@
+[
+  {
+    "Date": "2025-10-16",
+    "Cluster": "test-aurora-rds-m",
+    "WRITER_Max_CPU": 11.8,
+    "READER_Max_CPU": 11.43,
+    "READER_Count": 1
+  }
+]

@@ -1,68 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const K8sDashboard = () => {
   const [selectedView, setSelectedView] = useState('cpu');
-  const [selectedDate, setSelectedDate] = useState('2025-09-16');
-
-  // 원본 데이터
-  const rawData = [
-    {"date": "2025-09-16", "namespace": "svc1", "pod_count": 3, "avg_max_cpu": 1.42},
-    {"date": "2025-09-16", "namespace": "svc2", "pod_count": 3, "avg_max_cpu": 2.68},
-    {"date": "2025-09-16", "namespace": "svc3", "pod_count": 6, "avg_max_cpu": 19.87},
-    {"date": "2025-09-16", "namespace": "svc4", "pod_count": 13, "avg_max_cpu": 51.4},
-    {"date": "2025-09-16", "namespace": "svc5", "pod_count": 38, "avg_max_cpu": 16.28},
-    {"date": "2025-09-16", "namespace": "svc6", "pod_count": 3, "avg_max_cpu": 27.72},
-    {"date": "2025-09-16", "namespace": "svc7", "pod_count": 3, "avg_max_cpu": 0.34},
-    {"date": "2025-09-16", "namespace": "svc8", "pod_count": 3, "avg_max_cpu": 5.67}
-  ];
-
-  // 네임스페이스별로 데이터 그룹화
-  const namespaces = [...new Set(rawData.map(item => item.namespace))];
+  const [rawData, setRawData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // 날짜 목록
   const dates = [...new Set(rawData.map(item => item.date))];
+  const [selectedDate, setSelectedDate] = useState(dates[0] || '2025-09-16');
+
+  // API Gateway를 통해 데이터 가져오기
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/event', {
+          signal: abortController.signal
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        
+        const data = await response.json();
+        setRawData(data);
+        
+        // 데이터 로드 후 첫 번째 날짜로 설정
+        if (data.length > 0) {
+          const uniqueDates = [...new Set(data.map(item => item.date))];
+          setSelectedDate(uniqueDates[0]);
+        }
+      } catch (err) {
+        // AbortError는 무시 (정상적인 cleanup)
+        if (err.name === 'AbortError') {
+          console.log('Fetch aborted');
+          return;
+        }
+        setError(err.message);
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Cleanup: 컴포넌트 언마운트 시 fetch 취소
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  // 로딩 상태 처리
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: '18px',
+        color: '#6b7280'
+      }}>
+        로딩 중...
+      </div>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: '18px',
+        color: '#dc2626'
+      }}>
+        에러: {error}
+      </div>
+    );
+  }
 
   // CPU 사용량 기준 차트 데이터 (선택된 날짜만)
-  const cpuChartData = selectedDate === 'all' 
-    ? namespaces.map(namespace => {
-        const data = { namespace };
-        dates.forEach(date => {
-          const item = rawData.find(d => d.namespace === namespace && d.date === date);
-          data[date] = item ? item.avg_max_cpu : 0;
-        });
-        return data;
-      }).sort((a, b) => b[dates[0]] - a[dates[0]])
-    : rawData
-        .filter(item => item.date === selectedDate)
-        .map(item => ({
-          namespace: item.namespace,
-          cpu: item.avg_max_cpu
-        }))
-        .sort((a, b) => b.cpu - a.cpu);
+  const cpuChartData = rawData
+    .filter(item => item.date === selectedDate)
+    .map(item => ({
+      namespace: item.namespace,
+      cpu: item.avg_max_cpu
+    }))
+    .sort((a, b) => b.cpu - a.cpu);
 
   // Pod 수 기준 차트 데이터 (선택된 날짜만)
-  const podChartData = selectedDate === 'all'
-    ? namespaces.map(namespace => {
-        const data = { namespace };
-        dates.forEach(date => {
-          const item = rawData.find(d => d.namespace === namespace && d.date === date);
-          data[date] = item ? item.pod_count : 0;
-        });
-        return data;
-      }).sort((a, b) => b[dates[0]] - a[dates[0]])
-    : rawData
-        .filter(item => item.date === selectedDate)
-        .map(item => ({
-          namespace: item.namespace,
-          pods: item.pod_count
-        }))
-        .sort((a, b) => b.pods - a.pods);
+  const podChartData = rawData
+    .filter(item => item.date === selectedDate)
+    .map(item => ({
+      namespace: item.namespace,
+      pods: item.pod_count
+    }))
+    .sort((a, b) => b.pods - a.pods);
 
   // 필터링된 데이터
-  const filteredData = selectedDate === 'all' ? rawData : rawData.filter(item => item.date === selectedDate);
+  const filteredData = rawData.filter(item => item.date === selectedDate);
 
   // 통계 계산
+  const namespaces = [...new Set(filteredData.map(item => item.namespace))];
   const totalPods = filteredData.reduce((sum, item) => sum + item.pod_count, 0);
-  const avgCPU = (filteredData.reduce((sum, item) => sum + item.avg_max_cpu, 0) / filteredData.length).toFixed(2);
+  const avgCPU = filteredData.length > 0 
+    ? (filteredData.reduce((sum, item) => sum + item.avg_max_cpu, 0) / filteredData.length).toFixed(2)
+    : '0.00';
 
   const getCPUColor = (cpu) => {
     if (cpu > 40) return '#dc2626';
@@ -242,7 +295,6 @@ const K8sDashboard = () => {
               onChange={(e) => setSelectedDate(e.target.value)}
               style={styles.select}
             >
-              <option value="all">전체 기간</option>
               {dates.map(date => (
                 <option key={date} value={date}>{date}</option>
               ))}
@@ -274,87 +326,41 @@ const K8sDashboard = () => {
           </h2>
           
           <div style={styles.chartContainer}>
-            <ResponsiveContainer width="100%" height="100%">
-              {selectedView === 'cpu' && (
-                selectedDate === 'all' ? (
-                  <BarChart data={cpuChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="namespace" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={80}
-                      fontSize={12}
-                    />
-                    <YAxis label={{ value: 'CPU 사용량 (%)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value, name) => [`${value}%`, name]} />
-                    <Legend />
-                    {dates.map((date, index) => (
-                      <Bar 
-                        key={date} 
-                        dataKey={date} 
-                        fill={index === 0 ? '#3B82F6' : '#EF4444'} 
-                        name={date}
-                      />
-                    ))}
-                  </BarChart>
-                ) : (
-                  <BarChart data={cpuChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="namespace" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={80}
-                      fontSize={12}
-                    />
-                    <YAxis label={{ value: 'CPU 사용량 (%)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => [`${value}%`, 'CPU 사용량']} />
-                    <Bar dataKey="cpu" fill="#3B82F6" />
-                  </BarChart>
-                )
-              )}
-              
-              {selectedView === 'pods' && (
-                selectedDate === 'all' ? (
-                  <BarChart data={podChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="namespace" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={80}
-                      fontSize={12}
-                    />
-                    <YAxis label={{ value: 'Pod 수', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip />
-                    <Legend />
-                    {dates.map((date, index) => (
-                      <Bar 
-                        key={date} 
-                        dataKey={date} 
-                        fill={index === 0 ? '#10B981' : '#F59E0B'} 
-                        name={date}
-                      />
-                    ))}
-                  </BarChart>
-                ) : (
-                  <BarChart data={podChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="namespace" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={80}
-                      fontSize={12}
-                    />
-                    <YAxis label={{ value: 'Pod 수', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => [value, 'Pod 수']} />
-                    <Bar dataKey="pods" fill="#10B981" />
-                  </BarChart>
-                )
-              )}
-            </ResponsiveContainer>
+            {selectedView === 'cpu' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={cpuChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="namespace" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={80}
+                    fontSize={12}
+                  />
+                  <YAxis label={{ value: 'CPU 사용량 (%)', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip formatter={(value) => [`${value}%`, 'CPU 사용량']} />
+                  <Bar dataKey="cpu" fill="#3B82F6" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            
+            {selectedView === 'pods' && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={podChartData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="namespace" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={80}
+                    fontSize={12}
+                  />
+                  <YAxis label={{ value: 'Pod 수', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip formatter={(value) => [value, 'Pod 수']} />
+                  <Bar dataKey="pods" fill="#10B981" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
