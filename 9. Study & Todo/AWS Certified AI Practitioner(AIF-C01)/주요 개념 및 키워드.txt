@@ -1,0 +1,14 @@
+epoch: AI 모델이 전체 학습 데이터를 한 번 모두 학습하는 주기
+
+Partial dependence plots(PDPs): 
+
+Transfer learning(전이 학습): 이미 학습된 모델의 지식을 새로운 문제에 재학습하는 방법
+
+inference: 추론
+
+===== Amazon SageMaker =====
+Amazon SageMaker Ground Truth Plus: AI와 인간 검수를 결합해 고품질 데이터 라벨링(=annotation, 주석) 자동화 서비스
+Amazon SageMaker Feature Store: AI 모델 학습을 위한 feature를 저장, 관리, 공유하는 중앙 저장소
+Amazon SageMaker Data Wrangler: 데이터 전처리 과정을 시각적으로 자동화해주는 도구
+Amazon SageMaker Clarify: AI 모델의 편향(Bias)과 예측 결과의 설명 가능성을 분석하는 도구
+Amazon SageMaker Model Cards: AI 모델의 이력, 목적, 성능, 데이터 출처 등을 문서화해 투명성을 제공하는 기능
