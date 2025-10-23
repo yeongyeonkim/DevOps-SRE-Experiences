@@ -1,0 +1,107 @@
+================ 13:00 ~ 
+
+2주 전에 출시한 기능이다.
+
+Agentic AI
+ - 사람 개입 없이 AI가 행위함
+ 
+Generative AI observability chanllengers
+ - 복잡해서 가시성이 떨어진다.
+ 
+Bedrock AgentCore
+ - Agentic AI를 배포할 수 있는 쉬운 플랫폼이다.
+
+Amazon CloudWatch generative AI observability
+ - Curated insights
+ - 360 view of agent workflows
+ - zero-code
+ - end-to-end prompt tracing
+ - mask sensitive data
+ 
+CloudWatch GenAI Observability
+ - (사진)
+ 
+에이전트 세션: 유저와 이 에이전트가 커뮤니케이션 한 것
+(img)
+
+
+===================== 13:30 ~
+AIOps
+
+생성형 AI를 활용해서 Observability를 개선하는 방법을 알려주겠다.
+
+CloudWatch > SLO > Investigate
+ - 문제가 생기면 해결 방법을 알려주는 것
+ 
+AI Operations > 구성 안에 
+ CLoudTrail, X-Ray를 활성화해서 AI한테 액세스해서 데이터를 분석할 수 있도록 하는 것이 있다.
+ 
+AI Operation > 조사(Investigation) 
+ -> 이건 좋은듯. Lambda가 언제 S3와 통신했고 지금 왜 문제가 생겼고 권고하는 등의 가설(Hypothesis)을 준다.
+
+Log insights Query 결과에 investigate를 삽입할 수도 있음 (중간인지 이후인지는 모르겠다)
+
+AWS Kiro를 활용해서 AWS MCP를 생성하는 .json 파일에 대한 문제점을 IDE 툴에서 분석해준다.
+무엇이 문제이고 무엇을 해야하는지에 대한 분석과 결과를 알려줌.
+ (https://aws.amazon.com/ko/blogs/korea/aws-weekly-roundup-kiro-waitlist-ebs-volume-clones-ec2-capacity-manager-and-more-october-20-2025/ 찾으니 이런게 있더라)
+  https://aws.amazon.com/ko/blogs/korea/introducing-kiro/
+ 
+============================== 13: 45 ~ 
+
+1. AWS Cloud Governanace
+ rule, toole, process, report를 의미한다.
+ 고객이 비즈니스 목표를 달성한다.
+  보안 운영 컴플라이언스 비용과 밀접하게 연관되어있다.
+
+Multi-Account 전략이 중요하다.
+ - https://docs.aws.amazon.com/whitepapers/latest/organizing-your-aws-environment/organizing-your-aws-environment.html
+ 
+Easy set-up with AWS Control Tower
+ - 콘솔orAPI를 활용해서 랜딩존을 자동으로 생성한다.
+ - Account 프로비저닝이 자동화된다.
+ - API를 통해서 700개가 넘는 컨트롤을 관리(통합될 수 있다)할 수 있다.
+
+(Control Tower Architecture 사진)
+
+Control Catalog (위에서 말한 700개의 컨트롤과 관련)
+ - perventive: 사전 예방
+ - detective: 파악, 감지
+ - proactive: 선제적 대응
+ 
+AWS Config ★는 AWS Governanace의 중추적인 서비스이다.
+TRACK - ACCESS - REMEDIATE - AUDIT
+룰을 생성하는 것만이 아니다.
+리소스 변경사항도 트래킹이 가능하다.
+ 언제바뀌었는지 누가바꾸었는지
+ 
+AWS 리소스를 관리하고 문제를 해결해줄 수 있다라고 알면된다.
+
+모든 서비스의 기반이된다.
+예를 들어 1100개의 Account가 있고 EKS EOS에 의해 업데이트해야하는 버전을 관리하기가 어려울 떄
+이를 한눈에 알아볼 수 있도록 도왔따
+
+AWS Audit Manager
+ 생성형 AI 프레임워크를 관리한다.(딜로이트와 함께)
+
+기업이 신경써야하는 부분
+ - https://aws.amazon.com/ko/cloud-adoption-framework/
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

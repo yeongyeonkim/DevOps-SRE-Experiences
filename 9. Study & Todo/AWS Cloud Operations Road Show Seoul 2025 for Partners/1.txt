@@ -79,6 +79,7 @@ Cloudwatch는 span 그 요청에 대한 정보를 다 수집한다.
 Application Signal 
 1. AWS Distro for OpenTelemetry(ADOT, 오픈소스를 사용해서 데이터를 수집하는 단계)
  SDK 등 솔루션을 이미 사용하고 있더라고 이걸 Distro로 사용하면 됨
+ https://docs.aws.amazon.com/ko_kr/AmazonCloudWatch/latest/monitoring/CloudWatch-OTLP-UsingADOT.html
 ↓
 2. CloudWatch Agent (Standalone도 가능하고 EKS에 붙일수도 있음)  
 ↓
