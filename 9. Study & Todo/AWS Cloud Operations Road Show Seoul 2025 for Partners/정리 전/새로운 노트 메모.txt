@@ -1,0 +1,335 @@
+﻿새로운 노트
+2025.10.23 목 오전 9:44 ・ 31분 38초
+김영연
+
+
+참석자 1 00:29
+The first part is a mutual Model that we use for assessing and managing also maturity.
+The second part is a tool that you can actually use.
+It's ready to go and you can actually start using it today for your customers.
+So there are two parts to how many of you are from a technical background in this world like essays, developers, operators and quite a bit.
+And how know, if you are from a SAVES and Bey program management on business cycle,
+
+참석자 1 01:08
+I don't know if you. So I think this session is going to be relevant for both audiences again, you know, just looking at the people in this room and the names of the companies where we come from.
+So it's quite obvious why observability is important in our world because think about it observe it has been around since the beginning of medical science is something new here but what's changing now is the complexity
+
+참석자 1 01:35
+because in the microservice architecture in our world, when you have continents and servus applications, it's hard to manage observability and monitor system health.
+And if something breaks, it's getting harder for people to figure out what is going on and why things are going on and how to fix it.
+So that is why it's important and a lot of development is happening in this space.
+I, we have our own systems.
+Obviously the competition has their own systems and a lot of companies who've been,
+
+참석자 1 02:07
+you know, in the space in the traditional on plan world, they're actually adopting their tools to support the plant world.
+So there's a lot of activities happening here.
+So what you realized the import of consumerism is that it helps to have a standardized way of understanding where customers can in terms of the lutidity and understanding of a Ser.
+
+참석자 1 02:39
+So the first part of my presentation is that Model and like I said, I'll have, I'll walk you through.
+
+참석자 1 02:51
+So this is what it looks like.
+So if you look at the two dimensions on the horizontal axis, we have capabilities, the capabilities that customer organizations have.
+I'm very glad since near the maturity and we understand and there are four stages to this.
+The stage one is what we call the foundational OSAN modeling and that is about collecting elementary data or the applications that you have.
+It's a matrix, logs and traces like consumerary data
+
+참석자 1 03:21
+and customers when their progress to stage two, which is what we call the intermediate monitoring and that's about analyzing the elementary data that they collected.
+And as they moved to stage three of the advance of Sury and that's when they started to perform correlation and anomaly detection to understand what actually happened
+
+참석자 1 03:43
+and you have to fix it. And stage four is the right to possibility phase which is kind of new I mean we're still building tools and systems to identic tools to sort of create processes that can be used to sort of proactively identify and fix issues.
+That is the future and companies who playing that space as well.
+So that is the overall picture of observing the Model.
+But I'm want to talk you through each of the stages.
+Stage one is like I said, is
+
+참석자 1 04:14
+foundational merger. This is where everyone starts and like I said, this is about collecting temperature data.
+So what we see with customers is that typically this is done in silence.
+I mean we have different application teams, different things like Airwbs and operations and media other things they have their own ways of collecting data and analyzing it.
+This is very highly silable.
+So the problem with that is
+
+참석자 1 04:41
+basically the new opportunities for having new firms and that is important when we have a complex agricultural landscape.
+So the challenges that customers face they have very inconsistent monetary standards there's no unified facility systems and the developing processes get complex because if something breaks, it's really hard to figure out what actually happen and where.
+So that's a challenge and hence there is a,
+
+참석자 1 05:09
+for teams to collaborate across so that these are some of the challenges that customers face in this stage.
+So what we tell customers here is first of all, establish a good understanding of the current state across the world not just two teams just have it be intentional about understanding how obsolivity works across the world.
+
+참석자 1 05:36
+It's not impossible to have everything solved in one class.
+So identify initiatives that can be done.
+For example, if we can start implementing basic monitoring application monitoring features, that's what swinning application for example, if you have the DKS comp system, there are ways of swin them so that they generate pimentary signals that can be captured and analyzed.
+That's a kind of first
+
+참석자 1 06:02
+and for example, create dashboards, basic dashboards that can be used to understand where they stand in terms of the application standing in terms of their health.
+And not one is you can have, you know, you can establish virtual collection standards that's about what are the key metrics to be tracked and document that and start being about in tracking and managing those.
+
+참석자 1 06:26
+So this is typically what it looks like for stage one customers.
+Now if you go to stage two, like I said, this is what we really monitoring.
+
+참석자 1 07:05
+There is a very high prognective world because when you started smelling, I started deperating signals of think there's a lot of noise in there.
+
+참석자 1 07:26
+So what do you recommend to customers in this stage?
+First of all, have some organization wide polis and practices in terms of what kind of signals that you generate and how you use them.
+There is a time for things.
+The next step that address customers in this stage and I think what is more important is to implement action on APS that actually matters for the business because we have to monitor what matters.
+
+참석자 1 07:50
+So being able to identify key metrics that are important for business support is key here because you can set up your applications infrastructure to track those.
+Some examples of kind of next steps like you said, we defined KPS.
+And also one of the challenges is that you can define what good looks like because it's okay to say 100 percent of
+
+참석자 1 08:13
+something but the question is do you need a 100 percent and what does that mean?
+So being able to define and identify what matters and what good looks like is.
+
+참석자 1 08:25
+And again, if you look at the alerts study generated mean I talked about having death load.
+One of the things that you could do here is to refine and categorize alerts thaty generated
+
+참석자 1 08:41
+you know, composite alarms and metrics that can be used.
+And the other thing is very important here is not that you have orchestras, have the basic telemetry and the analytic capabilities when something breaks, it's important to have a analysis review postmodern process to understand what actually went wrong and how can we use that learning from that to sort of refine what we have L.
+
+참석자 1 09:20
+So that is stage two. Now if you're going to stage three, this is what we call the advanced survey where coordination and organ detection comes.
+I think this is important.
+A lot of customers are in this stage now for on the advanced pay service
+
+참석자 1 09:53
+unable to operate in a fairly complex distributed microservices and HOUS real time conation.
+The key here is that
+
+참석자 1 10:15
+now the challenge for customers in this space first of all, this is a fairly specialized field so people need to have staff who are knowledgeable in that area typically is SRAT specialized space so it's a little complex so there's a need for specialized skills and tools and not all tools can do an organization.
+So there's a need for having some tools that are able to do this.
+But I think the key thing here is that even though we have all,
+
+참석자 1 10:43
+there is goodness in here it's still very reactive because this we only when something breaks it would be great if feel like predict what is going to break and fix it.
+But that's not in this course.
+
+참석자 1 11:02
+There's still a lot of manal work involved in this even though we have to and correlation because there's a lot of you would still need a human in the room, a human expert who can actually you know, figure out what's going on.
+And it is not a bad thing actually because in many cases we're not at this point we're not really able to trust the system so to speak
+
+참석자 1 11:37
+try to start automate activities using airs.
+We have new capabilities coming being released implemented in the schools.
+Start using that and also try to integrate observerity with your operational system.
+For example, if you're using service now or Ginner, there are ways to some of connect this.
+For example, when something breaks, an alert can trigger an incident.
+
+참석자 1 12:12
+In examples of next steps, we talked about air off stilities, which there are some sessions in this afternoon where you'll be able to see more details about other AWS.
+
+참석자 1 12:27
+Now the last stage like I said is the I advance a variety of service and this is where automation comes and we are in the very early stage of this and there are companies who actually do this in bits and pieces
+
+참석자 1 12:49
+and then you'll see a lot of new things in there.
+For example, self interesting monitoring dashboards, conduct to dashboards when something happens, you don't want to see the whole thing and figure out what went wrong.
+You see dashboards that just to people in VISS
+
+참석자 1 13:09
+continuous improvement is again important like I mentioned earlier when something breaks that's a great opportunity to do that because all the good organizations were really great at managing obserability.
+Never forces were we actually figure out what we went for I mean, K talked about the incident that we had in Arab us a couple of days ago and I'm sure there's a lot of teams spending to understand what actually happened and fix it and put that larning back into the,
+
+참석자 1 13:46
+it's part of a global team.
+And when something like this happened a couple of years ago, they actually did the same process and they understood, they figured out what went wrong.
+
+참석자 1 14:11
+All framework four stages just to recap four stages
+
+참석자 1 14:25
+they are at the early stage, we have differenterate solutions for monitoring the workforce stage two customers.
+
+참석자 1 14:56
+So let me just pause here and switch gears to the second part of this is where
+
+참석자 1 15:20
+I'm assuming some of you have used this and you have actioned to Partner central the partner central there's an assessment tool.
+So this is what it looks like in working to your Partner central your ventures
+
+참석자 1 15:47
+and it also has information on the website.
+There's a link that shows the B.
+
+참석자 1 16:03
+So this is what it looks like.
+I'm not sure I can read this little small.
+So if you start with entering some basic details for the customers, then it walks you through a series of customs and with supporting information on the life.
+So typically this is done as a workshop.
+You sit with respective people from the partner and you know, you walk them through
+
+참석자 1 16:34
+you can rember we understand from a scale of one to four.
+And again, the criteria to be used for each grade is given you.
+So it's based on the rate and you go through all the questions.
+It takes about an hour, hour and a half to do.
+Let me show you what it was that I heard before you.
+
+참석자 1 16:57
+So this is the main login page that I was talking about.
+As I said, don't here to click on the lunch
+
+참석자 1 17:39
+on next and there are some details that needs to be filled in.
+I just call it this mesle, this more pustomal slow click on the next and it comes to this fel where you can search for.
+
+참석자 1 18:02
+Now there are two links here.
+So if you're working as a partner for APN Port, there's a link here that actually shows the details of what this means and how to use that.
+I'll open the one for I don't have a partner access so I'll open the one for internal.
+
+참석자 1 18:23
+So this is what it looks like you have a similar view from the partner body as well.
+This is the, the, the framework that we went through and there is some supporting information in here.
+And as you scroll down, it gives a lot of details about what are the typical scores on each category and what's the recommend action that you can is the starting point.
+So let's not work to the details.
+I'm showing you what the tool looks like.
+
+참석자 1 18:53
+If you select the visual Model assignment from there, click on next.
+That opens just be some data here opportunities.
+
+참석자 1 19:14
+So the work shop I talked about, you know, doing this in a session with the customers.
+It's really a day that's started there today and there's a ring out.
+So the good thing about this is that this opens the doors for your customers because the first of all you can offer this say so that's the first point you sit down without spend hour and a half flowers working through this then there's a presentation session maybe later on.
+
+참석자 1 20:07
+So that creates a. So that is the first step now like I said so there are 17 questions in here under four if you look at the left side here.
+So there are five categories, there are laws, how they manage logs and there's something on metrics, trazes, transports and A, which are the five categories they have and under each of them there are a bunch of priss for example, if you look at the logs section, the question here is how do you collect logs?
+That's a question that you ask your customers
+
+참석자 1 20:54
+helpful information on the right side here.
+So that basically talks about what logs are and how to use them.
+So there's an G person here and based on what you identified, you can make a judgment to rate them.
+For example, if this customer say, we collect store and analyze logs but we don't do things like H detection.
+So then they get a called two.
+So that's the general capture process.
+
+참석자 1 21:19
+So once that is done, you go to the next person and so on right?
+So there's a second person here that talks about how do you use logs again very simple process.
+You walked up through this and based on what you hear caption AD in this text box and based on that you can rate for example, if this customer says it's not applicable to them or they don't analyze the dogs, they can put NA.
+So that's the call for, right?
+
+참석자 1 21:46
+Then you go to the next person and so on.
+So there are 17 persons that you go through.
+All the supporting information is here.
+So that's a first space study that's what you do sitting with the custom.
+Then the second part of that is the research.
+Now you can,
+
+참석자 1 22:05
+that captures all the information that you, that shows all the information that we capture.
+For example, loves based on reading here you're saying they are at
+
+참석자 1 22:34
+at the end of this section this is the log section we have four questions in here.
+Now this is where you write the summary observations like I said earlier on this page.
+So let's say this is this customer is in stage two for the BGS.
+
+참석자 1 23:05
+There are a few recommended actions for typical customers who are on this stage.
+For example, they're saying, you know, extract key metrics out of low Givs because the told us they don't have analysis capabilities.
+So there are some recommended actions that can be included in the report and there are some links to references as well.
+Now what do you do here? Let's say as part of the work that you do back in your office, you can P.
+
+참석자 1 23:52
+So here it says action is to lose something but that's your recommendation, right?
+It really have to be
+
+참석자 1 24:06
+and what's a first required in doing that is this meding effort and we can again propose a target date for it right?
+And again, if you have insights into what the potential benefits, you can add that there as well.
+So after all that I can add it to the assessment pport that you want.
+So going back to the review section here, you will see again same thing that you added.
+So this is the block section where you have the notes that you have your analysis and then you are recommending action.
+
+참석자 1 24:39
+It's four metrics and the rest of it.
+So that is the review phase that you would typically in your office.
+There is a section called generic reports here and this is where you can actually create an offer and read based on what is D
+
+참석자 1 25:04
+a word format. You can do gate that we shared with various people and there's a, there are a few other summits that you can generate.
+
+참석자 1 25:24
+So let me show you what that looks like.
+This is an example with a bit more details that we created for the example students.
+
+참석자 1 25:38
+So it actually has different sections in here that send and it shows the round poore of these five dimensions based on.
+
+참석자 1 26:07
+And also this is bitten A Sc, a heat map that is generated again by the system and it goes to sorry, this is a heat map the heat map that generated based on the input that you've captured.
+If it's already obvious, that means there are some shoes and that should be Att.
+And the other section that you see here this is a summary of the actions that we created.
+And if you remember, I populate B action into that so they are pulled into the stables
+
+참석자 1 26:38
+and so the parity and the effort and target data and all of the capturing the,
+
+참석자 1 26:57
+so this is what is derivative.
+Now the other thing is you can actually create a snapshots.
+So let's say you produce a system for a customer life next week.
+Now if you have a bent of actions that you are committed to them and if you want to go back and see whether they have actually limited in two months down the road,
+
+참석자 1 27:15
+you can actually create another snapshot and compare them because we should do that.
+Now the snapshot that we created now and in the future it's possible to compare and see where they stand in terms of the child.
+
+참석자 1 27:45
+So that is a tool and again I'll give you a link to that so you can actually try to, you know, access them and do yourself with your background your just to wrap it up.
+So this tool that we have, it's not perfect but what it does is it opens a door for you and it gives you at least two touchpoints first to do the assessment and second to get the results of the presentation to work.
+
+참석자 1 28:11
+Actually what you've realized is that Osay, it's not a conversation that we have ons it's not top of mind of the customers.
+Think about it only when something breaks.
+But what this does is it use your opportunity for acting to have that conversation.
+And if you highlight,
+
+참석자 1 28:36
+yeah, the good thing about this tool is that you know, seting and we have a lot of customers who have off this for free.
+There's a bit more work in but I think it's a good investment okay so
+
+참석자 1 28:59
+yeah and like I said earlier, it helps you identify the pain points and the shoes and the customers.
+So they'll be more open to have these conversations when you are able to see where they have shoes.
+
+참석자 1 29:24
+And the fourth point is important because in these conversations you typically have multiple stakeholders involved.
+It's very hard for them to talk to each other in this context.
+Otherwise once they have something like this and they see the risks, there'll be opportunities for you to connect with organizations as well.
+And I think like I said earlier, this also gives you an opportunity to have a long term partners.
+
+참석자 1 30:31
+So this is what I had for today.
+Any questions from anybody before I want to the next job
+
+참석자 1 30:51
+so thank you again I'll be here.
+So for any, if you have questions, you find me here I'll be here all day.
+So thank you again. And to the rest of your jury.
+
+
+clovanote.naver.com
