@@ -1,4 +1,3 @@
- #1Topic 1
 A company makes forecasts each quarter to decide how to optimize operations to meet expected demand. The company uses ML models to make these forecasts.
 An AI practitioner is writing a report about the trained ML models to provide transparency and explainability to company stakeholders.
 What should the AI practitioner include in the report to meet the transparency and explainability requirements?
@@ -209,4 +208,4 @@ A. Build a speech recognition system.
 B. Create a natural language processing (NLP) named entity recognition system.
 C. Develop an anomaly detection system.
 D. Create a fraud forecasting system.
- 
+
