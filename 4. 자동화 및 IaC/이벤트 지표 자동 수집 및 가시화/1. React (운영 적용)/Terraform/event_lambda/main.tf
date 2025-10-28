@@ -20,10 +20,13 @@ module "eventbridge" {
 
 # trigger 2
 module "apigw" {
-  source            = "./modules/apigw"
-  api_name          = var.apigw_name
-  vpce_id           = var.apigw_vpce_id
-  resource_path     = var.apigw_resource_path
-  lambda_invoke_arn = module.lambda.lambda_arn
-  lambda_name       = var.lambda_name
+  source                = "./modules/apigw"
+  api_name              = var.apigw_name
+  vpce_id               = var.apigw_vpce_id
+  pod_path              = var.apigw_pod_path
+  rds_path              = var.apigw_rds_path
+  lambda_invoke_arn     = module.lambda.lambda_arn
+  lambda_name           = var.lambda_name
+  rds_lambda_invoke_arn = var.rds_lambda_invoke_arn
+  rds_lambda_name       = var.rds_lambda_name
 }

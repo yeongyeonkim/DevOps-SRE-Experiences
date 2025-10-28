@@ -1,21 +1,29 @@
 variable "region" {
-  type    = string
+  type = string
 }
 
 variable "lambda_name" {
-  type    = string
+  type = string
 }
 
 variable "lambda_role_arn" {
-  type    = string
+  type = string
+}
+
+variable "rds_lambda_name" {
+  type = string
+}
+
+variable "rds_lambda_invoke_arn" {
+  type = string
 }
 
 variable "lambda_handler" {
-  type    = string
+  type = string
 }
 
 variable "lambda_runtime" {
-  type    = string
+  type = string
 }
 
 variable "lambda_environment" {
@@ -30,25 +38,29 @@ variable "vpc_config" {
 }
 
 variable "lambda_timeout" {
-  type    = number
+  type = number
 }
 
 variable "eventbridge_rule_name" {
-  type    = string
+  type = string
 }
 
 variable "eventbridge_schedule_expr" {
-  type    = string
+  type = string
 }
 
 variable "apigw_name" {
-  type    = string
+  type = string
 }
 
 variable "apigw_vpce_id" {
-  type    = string
+  type = string
 }
 
-variable "apigw_resource_path" {
-  type    = string
+variable "apigw_pod_path" {
+  type = string
+}
+
+variable "apigw_rds_path" {
+  type = string
 }
