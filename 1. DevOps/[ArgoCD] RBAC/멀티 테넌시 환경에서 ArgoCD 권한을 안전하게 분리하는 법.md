@@ -18,11 +18,11 @@ argocd-rbac-cm 내에 단 몇 줄로도 권한 제어가 가능하지만 AppProj
 
 
 
-\### AppProject 구성
+### AppProject 구성
 
 
 
-\\!\[1](img/1.png)
+![1](img/1.png)
 
 
 
@@ -30,15 +30,15 @@ argocd-rbac-cm 내에 단 몇 줄로도 권한 제어가 가능하지만 AppProj
 
 
 
-1\.  sourceRepos  
+1.  sourceRepos  
 
 &nbsp;   : 애플리케이션 manifest가 위치할 수 있는 Git 저장소를 제한한다. (github, ECR 등)
 
-2\.  destinations  
+2.  destinations  
 
 &nbsp;   : 특정 프로젝트의 애플리케이션이 배포될 수 있는 cluster, namespace를 지정한다.
 
-3\.  roles  
+3.  roles  
 
 &nbsp;   : policy를 정의하고 user, group 별로 세밀한 권한을 부여할 수 있다.
 
@@ -80,7 +80,7 @@ spec:
 
 &nbsp;     policies:
 
-&nbsp;       - p, proj:test-project:test-full-access, applications, \*, \*, allow
+&nbsp;       - p, proj:test-project:test-full-access, applications, *, *, allow
 
 &nbsp;     groups:
 
@@ -90,7 +90,7 @@ spec:
 
 
 
-\### ArgoCD RBAC 설정
+### ArgoCD RBAC 설정
 
 
 
@@ -98,7 +98,7 @@ ArgoCD RBAC은 ArgoCD 리소스에 대한 액세스를 제한할 수 있도록�
 
 
 
-\\!\[2](img/2.png)
+![2](img/2.png)
 
 
 
@@ -130,7 +130,7 @@ data:
 
 
 
-\### ArgoCD UI에서 애플리케이션 생성
+### ArgoCD UI에서 애플리케이션 생성
 
 
 
@@ -138,7 +138,7 @@ AppProject와 RBAC을 구성했으면, 이제 해당 권한을 가진 유저로 
 
 
 
-\\!\[3](img/3.png)
+![3](img/3.png)
 
 
 
@@ -146,7 +146,7 @@ AppProject와 RBAC을 구성했으면, 이제 해당 권한을 가진 유저로 
 
 
 
-\### 느낀점
+### 느낀점
 
 
 
@@ -160,19 +160,19 @@ AppProject는 UI에서 생성하는 것이 좋은 것 같다. yaml로 관리해�
 
 ```
 
-&nbsp;   p, role:role-name, applications, \*, proj-name/\*, allow
+&nbsp;   p, role:role-name, applications, *, proj-name/*, allow
 
-&nbsp;   p, role:role-name, logs, \*, proj-name/\*, allow
+&nbsp;   p, role:role-name, logs, *, proj-name/*, allow
 
-&nbsp;   p, role:role-name, exec, \*, proj-name/\*, allow
+&nbsp;   p, role:role-name, exec, *, proj-name/*, allow
 
-&nbsp;   p, role:role-name, projects, \*, proj-name, allow
+&nbsp;   p, role:role-name, projects, *, proj-name, allow
 
-&nbsp;   p, role:role-name, certificates, get, \*, allow
+&nbsp;   p, role:role-name, certificates, get, *, allow
 
 &nbsp;   p, role:role-name, clusters, get, {ClusterEP}, allow
 
-&nbsp;   p, role:role-name, repositories, \*, \*, allow
+&nbsp;   p, role:role-name, repositories, *, *, allow
 
 
 
@@ -188,9 +188,9 @@ AppProject는 UI에서 생성하는 것이 좋은 것 같다. yaml로 관리해�
 
 
 
-\-   \[https://argo-cd.readthedocs.io/en/stable/user-guide/projects/](https://argo-cd.readthedocs.io/en/stable/user-guide/projects/)
+-   [https://argo-cd.readthedocs.io/en/stable/user-guide/projects/](https://argo-cd.readthedocs.io/en/stable/user-guide/projects/)
 
-\-   \[https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/)
+-   [https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/)
 
-\-   \[https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#rbac-model-structure](https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#rbac-model-structure)
+-   [https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#rbac-model-structure](https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#rbac-model-structure)
 
