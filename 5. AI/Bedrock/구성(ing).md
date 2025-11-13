@@ -1,6 +1,8 @@
 [Bedrock?]
 AWS Bedrock은 사용자가 직접 모델을 구축하거나 서버를 띄우는 서비스가 아니라, AWS가 관리하는 LLM 모델들을 API 형태로 제공하는 서비스이다. (생성형 AI)
 
+![권한](img/1.png)
+
 1. 사용할 모델(Claude, Nova 등) 액세스 권한이 부여
 2. Bedrock이 제공되는 region에서 활성화
 
@@ -14,6 +16,9 @@ Lambda에서 boto3로 bedrock-runtime 클라이언트를 호출해서 원하는 
 
 bedrock_client = boto3.client("bedrock-runtime", region_name="ap-northeast-2") 
 response = bedrock_client.invoke_model( modelId="anthropic.claude-3-5-sonnet-20240620-v1:0", contentType="application/json", accept="application/json", body=json.dumps(bedrock_payload) )
+
+사용 가능한 모델 목록
+![목록](img/2.png)
 
 ---
 [Architecture]
