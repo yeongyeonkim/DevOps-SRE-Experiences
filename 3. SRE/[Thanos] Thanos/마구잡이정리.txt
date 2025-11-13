@@ -1,0 +1,46 @@
+kubectl create secret generic thanos-objstore-config \
+  --from-file=thanos.yaml=thanos-config.yaml \
+  -n monitoring
+
+Bitnami Thanos 구성
+Query, Store, Compactor 설치
+
+1. Query
+ - 기본 역할: 여러 Prometheus나 Thanos Store, Ruler, Receive 노드 등을 federation 형태로 연결해 통합 질의를 수행한다.
+ - 클러스터 내에서 동적으로 스케일링되는 Prometheus(혹은 Sidecar)들을 자동으로 discovery하기 위해 DNS SRV 방식이 권장된다.
+
+
+
+```
+global
+  defaultStorageClass: "default"
+
+# fullnameOverride
+# clusterDomain: 클러스터 내부 DNS 탐색을 정확하게 수행하기 위해 필요
+
+query:
+  enabled: true
+  replicaCount: 2
+  stores:
+    - "dnssrv+_grpc._tcp.prometheus-operated.monitoring.svc.cluster.local"
+    # B Cluster의 Sidecar 주소 (나중에 추가)
+    # - "b-cluster-prometheus-sidecar.monitoring.svc.b-cluster:10901"
+    
+  service:
+    type: LoadBalancer  # 또는 NodePort, ClusterIP + Ingress
+    port: 9090
+  
+storegateway:
+  enabled: true
+  replicaCount: 2
+    
+compactor:
+  enabled: true
+  # 아래는 default 기간
+  retentionResolutionRaw: 30d
+  retentionResolution5m: 30d
+  retentionResolution1h: 10y
+  
+ruler:
+  enabled: false
+```

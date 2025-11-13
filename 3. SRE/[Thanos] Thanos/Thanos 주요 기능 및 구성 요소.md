@@ -52,6 +52,11 @@ Thanos Query 등이 StoreAPI를 통해 Prometheus 메트릭을 조회할 수 있
   - 때문에 갑자기 Prometheus 죽거나 재시작하면 최근 2시간 이내의 데이터가 손실된다.
  
  1-2. 때문에 영구적인 스토리지를 구성하거나 remote_write 기능을 활용한다. (
+
+
+#### Thanos Query
+
+* 통합 조회
   
 
 

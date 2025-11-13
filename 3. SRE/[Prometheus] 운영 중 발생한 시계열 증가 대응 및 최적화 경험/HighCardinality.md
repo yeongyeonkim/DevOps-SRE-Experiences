@@ -10,7 +10,7 @@
 
 #### Recording Rules 적용
 
-#### Label 설계 최적화
+#### Label 최적화
 
 ![bucket](cardinality/http_server_requests_seconds_bucket.png)
 
@@ -24,6 +24,10 @@
   `/config/application/management.metrics.distribution.slo.http.server.requests` 값 조정을 통해 
   무분별한 le 구간을 줄여서 시계열 수를 감소시킬 수 있게 된다.
 
-1. `topk(20, count by(__name__)({__name__!=""}))`
+
+* `topk(20, count by(__name__)({__name__!=""}))` 
+ -> 현재 Prometheus에 저장된 메트릭 이름 단위로 시계열이 몇 개 존재하는지를 보여준다.
  
- * 현재 Prometheus에 저장된 메트릭 이름 단위로 시계열이 몇 개 존재하는지를 보여준다.
+#### 
+
+http_server_requests_seconds_count{application="domain-sck", container="domain-master", endpoint="http", exception="ApiException", instance="172.120.20.144:8080", job="tc-domain", method="PUT", namespace="domain", outcome="CLIENT_ERROR", pod="tc-domain-5679b694d4-k4qhr", service="tc-domain", status="400", uri="/domain/v1/domains/{orderNo}"}

@@ -1,0 +1,73 @@
+1. metric_relabel_configs 옵션을 사용하여 시계열을 줄인다.
+
+2. recording rule을 삭제한다. (불필요한 경우)
+
+===========================================================
+
+시계열 수에 미치는 영향을 PromQL로 점검하는 방법
+
+count({__name__!=""}) by (job)
+
+특정 라벨이 붙은 메트릭 목록을 확인하는 쿼리
+
+count by (__name__) ({container_id!=""})
+
+------------------------------------------------------------
+
+#### metric_relabel_configs 설정
+
+
+특정 측정 항목 하나만 유지하는 
+
+metric_relabel_configs:
+  - source_labels: [__name__]
+    action: keep
+    regex: http_requests_total
+
+특정 메트릭에 대해 선택적으로 삭제
+
+metric_relabel_configs:
+  - source_labels: [__name__]
+	regex: promhttp_.* # Drop all metrics starting with "promhttp_"
+	action: drop
+	
+	
+-------------------------------------------------------------
+1. 먼저 우리가 필요한 레이블과 불필요한 레이블을 구별한다.
+
+#### 필요 레이블
+
+1) namespace, pod -> 필터링, 그룹화, 링크에 사용
+2) consumergroup, topic -> kafka 필수
+3) uri, method, status -> HTTP 필수
+
+#### 불필요 레이블
+
+1) 중복/불필요한 레이블
+ - uid, endpoint, service, instance
+
+2) k8s 관련 High Cardinality 레이블
+ - container, node_name, pod_id / host_ip
+
+cluster, workload_type, revision, version
+
+count({__name__!=""})
+ -> 지금 동작 중인 메트릭 개수
+ 
+headStats.numSeries
+ -> Prometheus가 관리 중인 전체 시계열 개수
+
+위 차이점을 고려해 적용 후 얼마나 줄여졌는지를 확인하기 위해
+최초 시계열 데이터 개수는 다음과 같이 잡았다.
+ count({__name__!=""}) = 180840
+ 
+
+---------
+
+UID 제거를 통한 시계열 감소 테스트
+
+
+count({uid!=""}) uid 라벨이 달린 시계열 개수
+ -> 10902
+count({__name__!=""}) 전체 시계열 수 (cardinality 감소 효과)
+ -> 180068
